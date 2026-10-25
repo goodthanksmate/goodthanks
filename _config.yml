@@ -1,0 +1,30 @@
+title: goodthanks
+description: A blog, used occasionally.
+url: https://goodthanks.org
+
+permalink: /blog/:year/:month/:title/
+
+plugins:
+  - jekyll-feed
+
+# Extra nav tabs live in _tabs/ — each file becomes goodthanks.org/<filename>/
+collections:
+  tabs:
+    output: true
+    permalink: /:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: tabs
+    values:
+      layout: page
+
+exclude:
+  - README.md
+  - .pages.yml
