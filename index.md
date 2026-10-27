@@ -1,5 +1,8 @@
 ---
-layout: home
-title: Hey, thanks for stopping by.
+title: Yeah I'm good, thanks.
 ---
-<p>This is goodthanks — mostly a blog I write in now and then. Have a look around.</p>
+Hi. Josh here. This is my silly little website. I've started to blog on here. Yes I know it's lame but it's for ME, not for YOU, so SHUT UP!  
+  
+  
+  
+Nah you're alright.
