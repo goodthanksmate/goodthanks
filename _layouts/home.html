@@ -6,6 +6,9 @@ layout: default
   {{ content }}
 </section>
 
+<p id="today" class="today" hidden></p>
+<script src="{{ '/assets/js/today.js' | relative_url }}" defer></script>
+
 <section>
   <h2 class="section-label">Latest posts</h2>
   {% include post-list.html posts=site.posts limit=5 %}

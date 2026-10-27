@@ -96,6 +96,9 @@ a:hover .emoji { animation: wiggle 0.45s ease-in-out; }
   a:hover .emoji { animation: none; }
 }
 
+/* Home page daily fact + ISS line */
+.today { margin-top: 32px; }
+
 .go-home { font: 17px var(--sans); margin-top: 32px; }
 .go-home a { text-decoration: none; }
 .post-list .emoji { margin-right: 0.75em; }
