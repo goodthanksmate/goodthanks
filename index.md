@@ -9,16 +9,16 @@ Hi. Josh here. This is my silly little website. I've started to blog on here. Ye
 
 &nbsp;
 
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
   
 
 Nah you're alright.
+
+
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
