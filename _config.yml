@@ -1,6 +1,9 @@
 title: goodthanks
 description: A blog, used occasionally.
 url: https://goodthanks.org
+timezone: Australia/Melbourne
+# Always show posts, even if their date is ahead of the server clock
+future: true
 
 permalink: /blog/:year/:month/:title/
 
