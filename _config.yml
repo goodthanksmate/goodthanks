@@ -1,7 +1,7 @@
 title: goodthanks
 description: A blog, used occasionally.
 url: https://goodthanks.org
-timezone: Australia/Melbourne
+timezone: Australia/Sydney
 # Always show posts, even if their date is ahead of the server clock
 future: true
 
@@ -17,6 +17,11 @@ collections:
     permalink: /:name/
 
 defaults:
+  # Set here rather than in index.md, because Pages CMS drops fields it doesn't know about
+  - scope:
+      path: "index.md"
+    values:
+      layout: home
   - scope:
       path: ""
       type: posts
@@ -28,6 +33,18 @@ defaults:
     values:
       layout: page
 
+# Emoji reactions under blog posts. reactions_api is the Cloudflare worker's address
+# (leave it empty to hide reactions). Names must match REACTIONS in reactions-worker/worker.js
+reactions_api: https://goodthanks-reactions.reactions-worker.workers.dev
+reactions:
+  - { name: like,  emoji: "👍", label: Like }
+  - { name: love,  emoji: "❤️", label: Love }
+  - { name: funny, emoji: "😂", label: Funny }
+  - { name: cool,  emoji: "😎", label: Cool }
+  - { name: dumb,  emoji: "🙄", label: Dumb }
+  - { name: sad,   emoji: "😢", label: Sad }
+
 exclude:
   - README.md
   - .pages.yml
+  - reactions-worker

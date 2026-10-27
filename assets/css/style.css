@@ -85,7 +85,7 @@ a:hover { color: var(--hover); text-decoration-thickness: 2px; }
 
 .emoji { font-style: normal; display: inline-block; }
 .post-header h1 .emoji, .page-title .emoji { margin-right: 0.45em; }
-a:hover .emoji { animation: wiggle 0.45s ease-in-out; }
+a:hover .emoji, button:hover .emoji { animation: wiggle 0.45s ease-in-out; }
 @keyframes wiggle {
   0%, 100% { transform: rotate(0); }
   25% { transform: rotate(-10deg); }
@@ -93,7 +93,7 @@ a:hover .emoji { animation: wiggle 0.45s ease-in-out; }
   75% { transform: rotate(-4deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  a:hover .emoji { animation: none; }
+  a:hover .emoji, button:hover .emoji { animation: none; }
 }
 
 /* Home page daily fact + ISS line */
@@ -160,6 +160,24 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
 .prose hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
 .prose table { border-collapse: collapse; width: 100%; font-size: 16px; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+
+/* Emoji reactions under posts */
+.reactions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 48px; }
+.reactions[hidden] { display: none; }
+.reactions button {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.reactions button:hover { border-color: var(--muted); }
+.reactions button.mine { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.reactions .emoji { font-size: 18px; line-height: 1; }
+.reactions .count:empty { display: none; }
 
 .post-nav {
   display: flex;

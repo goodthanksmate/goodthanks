@@ -12,6 +12,14 @@ layout: default
       {{ content }}
     </div>
 
+    {% if site.reactions_api %}
+    <div class="reactions" data-api="{{ site.reactions_api }}" data-post="{{ page.url }}" hidden>
+      {% for r in site.reactions %}<button type="button" data-reaction="{{ r.name }}" title="{{ r.label }}" aria-label="{{ r.label }}"><span class="emoji">{{ r.emoji }}</span><span class="count"></span></button>
+      {% endfor %}
+    </div>
+    <script src="{{ '/assets/js/reactions.js' | relative_url }}" defer></script>
+    {% endif %}
+
     <nav class="post-nav">
       {% if page.previous %}<a class="prev" href="{{ page.previous.url | relative_url }}">← {{ page.previous.title }}</a>{% else %}<span></span>{% endif %}
       {% if page.next %}<a class="next" href="{{ page.next.url | relative_url }}">{{ page.next.title }} →</a>{% endif %}
