@@ -1,0 +1,9 @@
+{% comment %} Sets post_image: the post's `image` field, or else the first picture in the post. {% endcomment %}
+{% assign post_image = include.post.image %}
+{% unless post_image %}
+  {% assign _imgs = include.post.content | split: '<img' %}
+  {% if _imgs.size > 1 %}
+    {% assign _src = _imgs[1] | split: 'src="' %}
+    {% assign post_image = _src[1] | split: '"' | first %}
+  {% endif %}
+{% endunless %}

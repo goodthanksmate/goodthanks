@@ -18,6 +18,12 @@ content:
       - name: date
         label: Date
         type: date
+      - name: image
+        label: Preview image (optional, shown as a thumbnail in the post list)
+        type: image
+      - name: emoji
+        label: Emoji (optional, shown next to the title)
+        type: string
       - name: body
         label: Post
         type: rich-text
@@ -34,6 +40,9 @@ content:
         label: Title (shown in the menu)
         type: string
         required: true
+      - name: emoji
+        label: Emoji (optional, shown next to the title in the menu)
+        type: string
       - name: order
         label: Menu position (lower = further left)
         type: number

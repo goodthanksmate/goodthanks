@@ -1,18 +1,32 @@
 ---
 layout: default
 ---
-<article class="post">
-  <header class="post-header">
-    <h1>{{ page.title }}</h1>
-    <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
-  </header>
+<div class="post-layout">
+  <article class="post">
+    <header class="post-header">
+      <h1>{{ page.title }}</h1>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+    </header>
 
-  <div class="prose">
-    {{ content }}
-  </div>
+    <div class="prose">
+      {{ content }}
+    </div>
 
-  <nav class="post-nav">
-    {% if page.previous %}<a class="prev" href="{{ page.previous.url | relative_url }}">← {{ page.previous.title }}</a>{% else %}<span></span>{% endif %}
-    {% if page.next %}<a class="next" href="{{ page.next.url | relative_url }}">{{ page.next.title }} →</a>{% endif %}
-  </nav>
-</article>
+    <nav class="post-nav">
+      {% if page.previous %}<a class="prev" href="{{ page.previous.url | relative_url }}">← {{ page.previous.title }}</a>{% else %}<span></span>{% endif %}
+      {% if page.next %}<a class="next" href="{{ page.next.url | relative_url }}">{{ page.next.title }} →</a>{% endif %}
+    </nav>
+  </article>
+
+  <aside class="post-sidebar">
+    <h2 class="section-label">Posts</h2>
+    <ul>
+      {% for post in site.posts %}
+      <li{% if post.url == page.url %} class="current"{% endif %}>
+        {% if post.url == page.url %}<span>{% if post.emoji %}<span class="emoji">{{ post.emoji }}</span> {% endif %}{{ post.title }}</span>{% else %}<a href="{{ post.url | relative_url }}">{% if post.emoji %}<span class="emoji">{{ post.emoji }}</span> {% endif %}{{ post.title }}</a>{% endif %}
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+      </li>
+      {% endfor %}
+    </ul>
+  </aside>
+</div>
