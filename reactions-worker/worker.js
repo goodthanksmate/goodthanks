@@ -4,10 +4,11 @@
 import { DurableObject } from 'cloudflare:workers';
 
 // Keep in sync with `reactions` in the site's _config.yml
-const REACTIONS = ['like', 'love', 'funny', 'cool', 'dumb', 'sad'];
+const REACTIONS = ['like', 'love', 'laugh', 'applaud', 'sad', 'dislike'];
 const ORIGINS = ['https://goodthanks.org', 'http://localhost:4000', 'http://127.0.0.1:4000'];
-// Most reactions of one kind on one post from a single internet connection, so clearing
-// browser data can't farm extra reactions but a shared household connection still works
+// Each browser gets one reaction per post. This caps how many browsers on a single internet
+// connection can react to one post, so clearing browser data can't farm extra reactions
+// but a shared household connection still works
 const MAX_PER_NETWORK = 3;
 
 export class PostReactions extends DurableObject {
@@ -42,15 +43,15 @@ export class PostReactions extends DurableObject {
     return this.state('');
   }
 
+  // Clicking your current reaction removes it; clicking a different one switches to it
   toggle(client, network, reaction) {
-    const had = this.sql.exec('SELECT 1 FROM reactions WHERE client = ? AND reaction = ?', client, reaction).toArray().length > 0;
-    if (had) {
-      this.sql.exec('DELETE FROM reactions WHERE client = ? AND reaction = ?', client, reaction);
-    } else {
-      const { n } = this.sql.exec('SELECT COUNT(*) AS n FROM reactions WHERE network = ? AND reaction = ?', network, reaction).one();
-      if (n < MAX_PER_NETWORK) {
-        this.sql.exec('INSERT INTO reactions (client, reaction, network) VALUES (?, ?, ?)', client, reaction, network);
-      }
+    const current = this.sql.exec('SELECT reaction FROM reactions WHERE client = ?', client).toArray();
+    this.sql.exec('DELETE FROM reactions WHERE client = ?', client);
+    if (current.some((row) => row.reaction === reaction)) return this.state(client);
+
+    const { n } = this.sql.exec('SELECT COUNT(*) AS n FROM reactions WHERE network = ?', network).one();
+    if (current.length > 0 || n < MAX_PER_NETWORK) {
+      this.sql.exec('INSERT INTO reactions (client, reaction, network) VALUES (?, ?, ?)', client, reaction, network);
     }
     return this.state(client);
   }

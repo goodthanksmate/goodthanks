@@ -37,12 +37,12 @@ defaults:
 # (leave it empty to hide reactions). Names must match REACTIONS in reactions-worker/worker.js
 reactions_api: https://goodthanks-reactions.reactions-worker.workers.dev
 reactions:
-  - { name: like,  emoji: "👍", label: Like }
-  - { name: love,  emoji: "❤️", label: Love }
-  - { name: funny, emoji: "😂", label: Funny }
-  - { name: cool,  emoji: "😎", label: Cool }
-  - { name: dumb,  emoji: "🙄", label: Dumb }
-  - { name: sad,   emoji: "😢", label: Sad }
+  - { name: like,    emoji: "👍", label: Like }
+  - { name: love,    emoji: "❤️", label: Love }
+  - { name: laugh,   emoji: "😂", label: Laugh }
+  - { name: applaud, emoji: "👏", label: Applaud }
+  - { name: sad,     emoji: "😢", label: Sad }
+  - { name: dislike, emoji: "👎", label: Dislike }
 
 exclude:
   - README.md

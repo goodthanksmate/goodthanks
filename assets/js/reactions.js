@@ -40,11 +40,12 @@
 
   buttons.forEach(function (b) {
     b.addEventListener('click', function () {
-      var r = b.dataset.reaction, i = state.mine.indexOf(r);
+      var r = b.dataset.reaction, had = state.mine.indexOf(r) !== -1;
 
-      // Show the change straight away; the server's answer then replaces it
-      if (i === -1) { state.mine.push(r); state.counts[r] = (state.counts[r] || 0) + 1; }
-      else { state.mine.splice(i, 1); state.counts[r] = Math.max(0, (state.counts[r] || 0) - 1); }
+      // One reaction per browser: show the switch straight away; the server's answer then replaces it
+      state.mine.forEach(function (old) { state.counts[old] = Math.max(0, (state.counts[old] || 0) - 1); });
+      state.mine = had ? [] : [r];
+      if (!had) state.counts[r] = (state.counts[r] || 0) + 1;
       paint();
 
       var seq = ++latest;
