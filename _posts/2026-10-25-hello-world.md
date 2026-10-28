@@ -4,7 +4,7 @@ date: 2026-10-28
 emoji: 👋
 ---
 Salutations (as the kids say).  
-If you're reading this, then you have officially shown more interest in me than I ever expected anybody would. Gold star for you!
+If you're reading this, then you have officially shown more interest in this website than I ever expected anybody would. Gold star for you!
 
 ![goldstar.png](/assets/images/goldstar.png)
 
