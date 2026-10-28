@@ -99,6 +99,78 @@ a:hover .emoji, button:hover .emoji { animation: wiggle 0.45s ease-in-out; }
 /* Home page daily fact + ISS line */
 .today { margin-top: 32px; }
 
+/* Guestbook */
+.guestbook { font-family: var(--sans); }
+.sign-form { padding: 20px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 36px; }
+.sign-form[hidden] { display: none; }
+.name-field { display: block; margin-bottom: 18px; }
+.name-field span, .pic-picker legend { display: block; font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 6px; padding: 0; }
+.name-field input {
+  width: 100%; max-width: 320px;
+  padding: 8px 12px;
+  font: 16px var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.name-field input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.pic-picker { border: 0; margin: 0 0 18px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.pic-picker label { cursor: pointer; }
+.pic-picker input { position: absolute; opacity: 0; pointer-events: none; }
+.pic-picker label span {
+  width: 48px; height: 48px;
+  display: grid; place-items: center;
+  font-size: 26px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+.pic-picker label:hover span { border-color: var(--muted); }
+.pic-picker input:checked + span { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--bg)); }
+.pic-picker input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sign-form button {
+  padding: 9px 18px;
+  font: 600 15px var(--sans);
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.sign-form button:hover { background: var(--hover); }
+.sign-form button:disabled { opacity: 0.6; cursor: default; }
+.sign-form { font-family: var(--sans); }
+.form-msg { color: #dc2626; font-size: 14px; margin: 10px 0 0; }
+.form-msg:empty { display: none; }
+.signed-msg { font-size: 18px; margin: 0 0 36px; }
+.signed-msg strong { color: var(--accent); }
+.guestbook-entries { list-style: none; margin: 0; padding: 0; }
+.guestbook-entries li { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.guestbook-entries .pic {
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  font-size: 22px;
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+.guestbook-entries .name { font-weight: 600; overflow-wrap: anywhere; }
+.guestbook-entries .num { color: var(--muted); font-size: 14px; font-weight: 600; }
+.guestbook-entries time { margin-left: auto; flex: 0 0 auto; color: var(--muted); font-size: 14px; }
+
+/* Sign-to-react box and who reacted */
+.react-sign { margin-top: 20px; font-family: var(--sans); }
+.react-sign[hidden] { display: none; }
+.react-sign > p { margin: 0 0 10px; font-size: 15px; }
+.react-sign .sign-form { margin-bottom: 0; }
+.reacted-by { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; font: 14px var(--sans); }
+.reacted-by[hidden] { display: none; }
+.reacted-by li { padding: 3px 10px; border-radius: 999px; background: var(--code-bg); }
+
+.sign-nudge { margin: 12px 0 0; font: 15px var(--sans); }
+.sign-nudge a { text-decoration: none; }
+
 .go-home { font: 17px var(--sans); margin-top: 32px; }
 .go-home a { text-decoration: none; }
 .post-list .emoji { margin-right: 0.75em; }

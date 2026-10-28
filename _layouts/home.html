@@ -7,6 +7,7 @@ layout: default
 </section>
 
 <p id="today" class="today" hidden></p>
+<p class="sign-nudge" hidden><a href="{{ '/guestbook/' | relative_url }}"><span class="emoji">👋</span> New here? Sign the guestbook</a></p>
 <script src="{{ '/assets/js/today.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 
 <section>

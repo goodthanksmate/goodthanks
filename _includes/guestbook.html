@@ -1,0 +1,8 @@
+<section class="guestbook">
+  {% include sign-form.html hidden=true %}
+  <p class="signed-msg" hidden>You're guest <strong>#<span></span></strong>. Thanks for signing! 👍</p>
+
+  <ul class="guestbook-entries"></ul>
+  <p class="guestbook-empty muted" hidden>Nobody's signed yet. Be the first!</p>
+</section>
+<script src="{{ '/assets/js/guestbook.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

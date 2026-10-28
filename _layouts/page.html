@@ -9,4 +9,6 @@ layout: default
   <div class="prose">
     {{ content }}
   </div>
+
+  {% if page.url == "/guestbook/" and site.reactions_api %}{% include guestbook.html %}{% endif %}
 </article>

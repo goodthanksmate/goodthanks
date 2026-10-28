@@ -17,6 +17,11 @@ layout: default
       {% for r in site.reactions %}<button type="button" data-reaction="{{ r.name }}" title="{{ r.label }}" aria-label="{{ r.label }}"><span class="emoji">{{ r.emoji }}</span><span class="count"></span></button>
       {% endfor %}
     </div>
+    <div class="react-sign" hidden>
+      <p>Sign the guestbook to react! Just a name and an icon.</p>
+      {% include sign-form.html button="Sign & react" %}
+    </div>
+    <ul class="reacted-by" hidden></ul>
     <script src="{{ '/assets/js/reactions.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
     {% endif %}
 

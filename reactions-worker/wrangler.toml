@@ -9,3 +9,11 @@ class_name = "PostReactions"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["PostReactions"]
+
+[[durable_objects.bindings]]
+name = "SITE"
+class_name = "SiteBook"
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["SiteBook"]

@@ -38,11 +38,15 @@ defaults:
 reactions_api: https://goodthanks-reactions.reactions-worker.workers.dev
 reactions:
   - { name: like,    emoji: "👍", label: Like }
-  - { name: love,    emoji: "❤️", label: Love }
-  - { name: laugh,   emoji: "😂", label: Laugh }
-  - { name: applaud, emoji: "👏", label: Applaud }
-  - { name: sad,     emoji: "😢", label: Sad }
   - { name: dislike, emoji: "👎", label: Dislike }
+  - { name: love,    emoji: "❤️", label: Love }
+  - { name: applaud, emoji: "👏", label: Applaud }
+  - { name: laugh,   emoji: "😂", label: Laugh }
+  - { name: sad,     emoji: "😢", label: Sad }
+
+# Icons guests can pick when signing the guestbook. Keep in sync with GUESTBOOK_EMOJIS
+# in reactions-worker/worker.js
+guestbook_emojis: ["👤", "🌸", "🐶", "🎸", "🦋", "⚽", "🐱", "🌴", "🚀", "🐢", "♟️", "🦆", "🎹", "❄️", "🐴", "🌻", "🛹", "🐠", "🏀", "🐸"]
 
 exclude:
   - README.md
