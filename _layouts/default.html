@@ -24,6 +24,7 @@
         <a href="{{ tab.url | relative_url }}"{% if page.url == tab.url %} class="active"{% endif %}>{% if tab.emoji %}<span class="emoji">{{ tab.emoji }}</span> {% endif %}{{ tab.title }}</a>
         {% endfor %}
       </nav>
+      {% if site.reactions_api %}<a class="me-chip" href="{{ '/guestbook/' | relative_url }}" hidden><span class="emoji"></span><span class="me-name"></span></a>{% endif %}
     </div>
   </header>
 

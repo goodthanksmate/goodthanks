@@ -1,5 +1,5 @@
-// Shared guestbook helpers: the anonymous browser ID, signing, and sign forms.
-// Pages with a `.sign-nudge` element show it only to browsers that haven't signed yet.
+// Shared guestbook helpers: the anonymous browser ID, signing, and sign forms. Shows the signed-in
+// guest's name and icon in the header, and `.sign-nudge` elements only to browsers that haven't signed.
 (function () {
   var api = document.documentElement.dataset.api;
   if (!api) return;
@@ -27,18 +27,27 @@
         body: JSON.stringify({ client: client, name: form.elements.name.value, emoji: form.elements.emoji.value })
       })
         .then(function (r) { return r.json(); })
-        .then(function (d) { if (d.error) msg.textContent = d.error; else onSigned(d); })
+        .then(function (d) { if (d.error) msg.textContent = d.error; else { onSigned(d); g.refreshMe(); } })
         .catch(function () { msg.textContent = "Couldn't sign right now, try again in a bit."; })
         .then(function () { button.disabled = false; });
     });
   };
 
-  document.addEventListener('DOMContentLoaded', function () {
-    var nudges = document.querySelectorAll('.sign-nudge');
-    if (!nudges.length) return;
+  g.refreshMe = function () {
     fetch(api + '/guestbook?me&client=' + client)
       .then(function (r) { return r.json(); })
-      .then(function (d) { if (!d.guest) [].forEach.call(nudges, function (n) { n.hidden = false; }); })
+      .then(function (d) {
+        [].forEach.call(document.querySelectorAll('.sign-nudge'), function (n) { n.hidden = !!d.guest; });
+        var chip = document.querySelector('.me-chip');
+        if (!chip) return;
+        chip.hidden = !d.guest;
+        if (!d.guest) return;
+        chip.querySelector('.emoji').textContent = d.emoji;
+        chip.querySelector('.me-name').textContent = d.name;
+        chip.title = "You're guest #" + d.guest;
+      })
       .catch(function () {});
-  });
+  };
+
+  document.addEventListener('DOMContentLoaded', g.refreshMe);
 })();

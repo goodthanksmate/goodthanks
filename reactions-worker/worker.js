@@ -198,7 +198,9 @@ export default {
 
       if (request.method === 'GET' && params.has('me')) {
         const me = validClient(client) ? await site.guestOf(client) : null;
-        return reply({ guest: me ? me.number : null });
+        if (!me) return reply({ guest: null });
+        const { name, emoji } = (await site.guests([me.id]))[me.id];
+        return reply({ guest: me.number, name, emoji });
       }
       if (request.method === 'GET') return reply(await site.entries(validClient(client) ? client : ''));
       if (request.method !== 'POST') return reply({ error: 'method not allowed' }, 405);
