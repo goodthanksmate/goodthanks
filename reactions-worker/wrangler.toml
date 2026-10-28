@@ -2,6 +2,10 @@ name = "goodthanks-reactions"
 main = "worker.js"
 compatibility_date = "2025-06-01"
 
-[[kv_namespaces]]
-binding = "REACTIONS"
-id = "fa7d35cb927d4b219c0521d965d7ebee"
+[[durable_objects.bindings]]
+name = "POSTS"
+class_name = "PostReactions"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PostReactions"]

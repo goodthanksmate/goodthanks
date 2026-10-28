@@ -1,51 +1,61 @@
 // Emoji reaction buttons under blog posts. Counts come from the Cloudflare worker in
-// reactions-worker/; which buttons this visitor has pressed is remembered in their browser.
+// reactions-worker/, which also remembers which reactions belong to this browser.
 (function () {
   var box = document.querySelector('.reactions');
   if (!box) return;
-  var api = box.dataset.api, post = box.dataset.post;
-  var storageKey = 'reacted:' + post;
-  var mine = {}, counts = {}, busy = {};
-  try { mine = JSON.parse(localStorage.getItem(storageKey)) || {}; } catch (e) {}
+  var api = box.dataset.api + '?post=' + encodeURIComponent(box.dataset.post);
 
+  // Anonymous random ID so the server knows which reactions are this browser's
+  var client;
+  try { client = localStorage.getItem('reactions-client'); } catch (e) {}
+  if (!client) {
+    client = crypto.randomUUID();
+    try { localStorage.setItem('reactions-client', client); } catch (e) {}
+  }
+
+  var state = { counts: {}, mine: [] };
+  var latest = 0;
   var buttons = [].slice.call(box.querySelectorAll('button'));
 
   function paint() {
     buttons.forEach(function (b) {
-      var r = b.dataset.reaction;
-      b.querySelector('.count').textContent = counts[r] || '';
-      b.classList.toggle('mine', !!mine[r]);
-      b.setAttribute('aria-pressed', mine[r] ? 'true' : 'false');
+      var r = b.dataset.reaction, on = state.mine.indexOf(r) !== -1;
+      b.querySelector('.count').textContent = state.counts[r] || '';
+      b.classList.toggle('mine', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
 
-  fetch(api + '?post=' + encodeURIComponent(post))
+  // Responses can arrive out of order when clicking fast, so only the newest one counts
+  function apply(seq) {
+    return function (s) {
+      if (seq === latest && s && s.counts) { state = s; paint(); }
+    };
+  }
+
+  fetch(api + '&client=' + client)
     .then(function (r) { return r.json(); })
-    .then(function (c) { counts = c; paint(); box.hidden = false; })
+    .then(function (s) { apply(latest)(s); box.hidden = false; })
     .catch(function () {});
 
   buttons.forEach(function (b) {
     b.addEventListener('click', function () {
-      var r = b.dataset.reaction;
-      if (busy[r]) return;
-      busy[r] = true;
-      var delta = mine[r] ? -1 : 1;
+      var r = b.dataset.reaction, i = state.mine.indexOf(r);
 
-      // Update straight away, then settle on whatever the server says
-      if (delta > 0) mine[r] = true; else delete mine[r];
-      counts[r] = Math.max(0, (counts[r] || 0) + delta);
+      // Show the change straight away; the server's answer then replaces it
+      if (i === -1) { state.mine.push(r); state.counts[r] = (state.counts[r] || 0) + 1; }
+      else { state.mine.splice(i, 1); state.counts[r] = Math.max(0, (state.counts[r] || 0) - 1); }
       paint();
-      try { localStorage.setItem(storageKey, JSON.stringify(mine)); } catch (e) {}
 
-      fetch(api + '?post=' + encodeURIComponent(post), {
+      var seq = ++latest;
+      fetch(api, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reaction: r, delta: delta })
+        body: JSON.stringify({ client: client, reaction: r })
       })
         .then(function (res) { return res.json(); })
-        .then(function (c) { if (!c.error) { counts = c; paint(); } })
-        .catch(function () {})
-        .then(function () { busy[r] = false; });
+        .then(apply(seq))
+        .catch(function () {});
     });
   });
 })();
