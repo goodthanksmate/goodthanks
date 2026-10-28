@@ -10,7 +10,7 @@ If you're reading this, then you have officially shown more interest in me than 
 
 It even says 'GOLD STAR' on it in case you forget what it is. That's the kind of elite-tier customer service that you can expect here at [goodthanks.org](goodthanks.org).
 
-Anyway, I feel like I should explain why I'm starting a blog in the year 2026 (especially when [the very fabric of the internet itself appears to be in serious danger](https://thehackernews.com/2026/10/cisa-confirms-active-exploitation-of.html)) There are a few main reasons:
+Anyway, I feel like I should explain why I'm starting a blog in the year 2026. There are a few main reasons:
 
 1. **Social media *sucks*, and I feel that really embarrassing desire to *express myself*.** I have more to say on that but that's a whole post in and of itself.
 2. **I want to document my thoughts/feelings/goals etc throughout the years.** It'd be cool to look back on this post in 2036 and cringe over how much of a shithead I was. But if 2036 Josh IS reading this, then... don't you have anything better to do? You're almost 40, bro. Grow up.
