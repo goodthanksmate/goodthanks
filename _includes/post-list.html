@@ -1,13 +1,15 @@
 {% if include.posts.size > 0 %}
-<ul class="post-list">
+<ul class="post-list"{% if site.reactions_api %} data-reactions-api="{{ site.reactions_api }}" data-reactions="{{ site.reactions | jsonify | escape }}"{% endif %}>
   {% for post in include.posts limit: include.limit %}
   <li>
     <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d" }}</time>
     <a href="{{ post.url | relative_url }}">{% if post.emoji %}<span class="emoji">{{ post.emoji }}</span> {% endif %}{{ post.title }}</a>
+    {% if site.reactions_api %}<span class="post-reactions" data-post="{{ post.url }}"></span>{% endif %}
     {% if post.image %}<a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true"><img src="{{ post.image | relative_url }}" alt="" loading="lazy"></a>{% endif %}
   </li>
   {% endfor %}
 </ul>
+{% if site.reactions_api %}<script src="{{ '/assets/js/reaction-totals.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>{% endif %}
 {% else %}
 <p class="muted">Nothing here yet.</p>
 {% endif %}

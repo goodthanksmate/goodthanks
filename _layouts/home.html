@@ -7,7 +7,7 @@ layout: default
 </section>
 
 <p id="today" class="today" hidden></p>
-<script src="{{ '/assets/js/today.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/today.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 
 <section>
   <h2 class="section-label">Latest posts</h2>

@@ -17,7 +17,7 @@ layout: default
       {% for r in site.reactions %}<button type="button" data-reaction="{{ r.name }}" title="{{ r.label }}" aria-label="{{ r.label }}"><span class="emoji">{{ r.emoji }}</span><span class="count"></span></button>
       {% endfor %}
     </div>
-    <script src="{{ '/assets/js/reactions.js' | relative_url }}" defer></script>
+    <script src="{{ '/assets/js/reactions.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
     {% endif %}
 
     <nav class="post-nav">

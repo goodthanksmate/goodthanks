@@ -133,6 +133,35 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
   font-variant-numeric: tabular-nums;
 }
 .post-list a { color: var(--text); text-decoration: none; font-weight: 600; }
+.post-reactions {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: var(--code-bg);
+  color: var(--muted);
+  font: 700 18px/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+.post-reactions:empty { display: none; }
+.post-reactions .stack { display: inline-flex; }
+.post-reactions .stack span {
+  position: relative;
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  margin-left: -7px;
+  font-size: 16px;
+  line-height: 1;
+}
+.post-reactions .stack span:first-child { margin-left: 0; z-index: 3; }
+.post-reactions .stack span:nth-child(2) { z-index: 2; }
+.post-reactions .stack span:nth-child(3) { z-index: 1; }
+
+.post-reactions + .thumb { margin-left: 16px; }
 .post-list .thumb { flex: 0 0 auto; margin-left: auto; align-self: center; line-height: 0; }
 .post-list .thumb img { width: 64px; height: 48px; object-fit: cover; border-radius: 4px; }
 .post-list a:hover { color: var(--hover); }

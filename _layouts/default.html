@@ -6,7 +6,7 @@
   <title>{% if page.title and page.url != "/" %}{{ page.title }} · {% endif %}{{ site.title }}</title>
   <meta name="description" content="{{ page.description | default: site.description }}">
   <link rel="icon" href="{{ '/assets/favicon.svg' | relative_url }}" type="image/svg+xml">
-  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
   {% feed_meta %}
   {% if page.layout == "post" %}{% include post-image.html post=page %}{% if post_image %}
   <meta property="og:image" content="{{ post_image | absolute_url }}">{% endif %}{% endif %}

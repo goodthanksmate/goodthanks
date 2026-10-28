@@ -22,14 +22,24 @@ export class PostReactions extends DurableObject {
     )`);
   }
 
-  state(client) {
+  counts() {
     const counts = {};
     for (const row of this.sql.exec('SELECT reaction, COUNT(*) AS n FROM reactions GROUP BY reaction')) {
       counts[row.reaction] = row.n;
     }
+    return counts;
+  }
+
+  state(client) {
+    const counts = this.counts();
     const mine = this.sql.exec('SELECT reaction FROM reactions WHERE client = ?', client)
       .toArray().map((row) => row.reaction);
     return { counts, mine };
+  }
+
+  reset() {
+    this.sql.exec('DELETE FROM reactions');
+    return this.state('');
   }
 
   toggle(client, network, reaction) {
@@ -79,8 +89,26 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers });
 
     const params = new URL(request.url).searchParams;
+    const validPost = (p) => /^\/blog\/[a-z0-9\/_-]{1,150}$/i.test(p);
+
+    // Counts for many posts at once, for the blog list: ?posts=/blog/a/,/blog/b/
+    if (request.method === 'GET' && params.has('posts')) {
+      const posts = params.get('posts').split(',').slice(0, 50);
+      if (!posts.every(validPost)) return reply({ error: 'bad post' }, 400);
+      const all = await Promise.all(posts.map((p) => env.POSTS.get(env.POSTS.idFromName(p)).counts()));
+      return reply(Object.fromEntries(posts.map((p, i) => [p, all[i]])));
+    }
+
     const post = params.get('post') || '';
-    if (!/^\/blog\/[a-z0-9\/_-]{1,150}$/i.test(post)) return reply({ error: 'bad post' }, 400);
+    if (!validPost(post)) return reply({ error: 'bad post' }, 400);
+
+    // Wipe a post's reactions: POST ?post=...&reset with "Authorization: Bearer <ADMIN_TOKEN>"
+    if (request.method === 'POST' && params.has('reset')) {
+      if (!env.ADMIN_TOKEN || request.headers.get('Authorization') !== 'Bearer ' + env.ADMIN_TOKEN) {
+        return reply({ error: 'not allowed' }, 403);
+      }
+      return reply(await env.POSTS.get(env.POSTS.idFromName(post)).reset());
+    }
 
     const body = request.method === 'POST' ? await request.json().catch(() => ({})) : {};
     const client = request.method === 'POST' ? body.client : params.get('client');
