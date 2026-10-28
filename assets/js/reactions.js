@@ -12,6 +12,7 @@
   var buttons = [].slice.call(box.querySelectorAll('button'));
 
   function paint() {
+    sortButtons();
     buttons.forEach(function (b) {
       var r = b.dataset.reaction, on = state.mine.indexOf(r) !== -1;
       b.querySelector('.count').textContent = state.counts[r] || '';
@@ -56,6 +57,14 @@
       .catch(function () {});
   }
 
+  // Most-used reactions first, ties in the usual order
+  function sortButtons() {
+    buttons
+      .map(function (b, i) { return { b: b, i: i, n: state.counts[b.dataset.reaction] || 0 }; })
+      .sort(function (x, y) { return y.n - x.n || x.i - y.i; })
+      .forEach(function (x) { box.appendChild(x.b); });
+  }
+
   fetch(api + '&client=' + g.client)
     .then(function (r) { return r.json(); })
     .then(function (s) { apply(latest)(s); box.hidden = false; })
@@ -64,6 +73,16 @@
   // Long-press on touch screens shows the who-used-it list instead of reacting
   var pressTimer = null, longPressed = false, startX = 0, startY = 0;
   function hideWho() { buttons.forEach(function (b) { b.classList.remove('show-who'); }); }
+
+  // Keep the who-used-it popup on screen: nudge it sideways if it would poke off an edge
+  function placeWho(b) {
+    var who = b.querySelector('.who');
+    who.style.setProperty('--nudge', '0px');
+    var rect = who.getBoundingClientRect(), margin = 8, nudge = 0;
+    if (rect.left < margin) nudge = margin - rect.left;
+    else if (rect.right > window.innerWidth - margin) nudge = window.innerWidth - margin - rect.right;
+    who.style.setProperty('--nudge', nudge + 'px');
+  }
   document.addEventListener('pointerdown', function (e) { if (!box.contains(e.target)) hideWho(); });
 
   buttons.forEach(function (b) {
@@ -75,6 +94,7 @@
         longPressed = true;
         hideWho();
         b.classList.add('show-who');
+        placeWho(b);
       }, 450);
     });
     b.addEventListener('pointermove', function (e) {
@@ -84,6 +104,8 @@
       b.addEventListener(type, function () { clearTimeout(pressTimer); pressTimer = null; });
     });
     b.addEventListener('contextmenu', function (e) { if (longPressed) e.preventDefault(); });
+    b.addEventListener('mouseenter', function () { placeWho(b); });
+    b.addEventListener('focus', function () { placeWho(b); });
 
     b.addEventListener('click', function () {
       if (longPressed) { longPressed = false; return; }

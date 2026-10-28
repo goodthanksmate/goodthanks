@@ -96,6 +96,17 @@ a:hover .emoji, button:hover .emoji { animation: wiggle 0.45s ease-in-out; }
   a:hover .emoji, button:hover .emoji { animation: none; }
 }
 
+/* Spinning ASCII donut on the home page */
+.donut {
+  margin: 0 0 24px;
+  font: 10px/1 var(--mono);
+  color: var(--muted);
+  text-align: center;
+  white-space: pre;
+  overflow: hidden;
+  user-select: none;
+}
+
 /* Home page daily fact + ISS line */
 .today { margin-top: 32px; }
 
@@ -240,6 +251,7 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
 .post-header { margin-bottom: 32px; }
 .post-header time { color: var(--muted); font: 15px var(--sans); }
 
+.prose { overflow-wrap: break-word; }
 .prose img, .prose video { max-width: 100%; height: auto; border-radius: 4px; }
 .prose figure { margin: 32px 0; }
 .prose figcaption { color: var(--muted); font: 14px var(--sans); text-align: center; margin-top: 8px; }
@@ -281,7 +293,7 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + var(--nudge, 0px)));
   z-index: 5;
   display: none;
   flex-direction: column;
@@ -298,7 +310,7 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
 .reactions .who::after {
   content: "";
   position: absolute;
-  top: 100%; left: 50%;
+  top: 100%; left: calc(50% - var(--nudge, 0px));
   transform: translateX(-50%);
   border: 6px solid transparent;
   border-top-color: var(--text);
@@ -358,4 +370,28 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
   main.wrap { padding-top: 32px; }
   .page-title, .post-header h1, .intro h1 { font-size: 28px; }
   .post-list li { gap: 14px; }
+
+  /* Header: menu on its own row with bigger tap targets */
+  .site-header .wrap { padding-top: 14px; padding-bottom: 8px; row-gap: 2px; }
+  .site-header nav { gap: 0 14px; font-size: 14px; }
+  .site-header nav a { padding: 8px 0; }
+
+  /* All seven reactions on one row, as big tap targets */
+  .reactions { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .reactions button { justify-content: center; gap: 3px; min-height: 42px; padding: 6px 0; font-size: 12px; }
+  .reactions .emoji { font-size: 17px; }
+
+  .pic-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
+  .pic-picker label span { width: auto; aspect-ratio: 1; height: auto; }
+  .sign-form { padding: 16px; }
+  .guestbook-entries li { gap: 10px; }
+  .guestbook-entries time { font-size: 13px; }
+}
+
+@media (max-width: 360px) {
+  /* Keep the menu on one line; on the very narrowest phones it can slide sideways */
+  .site-header nav { gap: 0 9px; font-size: 12.5px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .site-header nav::-webkit-scrollbar { display: none; }
+  .site-header nav a { white-space: nowrap; }
+  .donut { font-size: 9px; }
 }
