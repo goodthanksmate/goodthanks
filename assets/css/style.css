@@ -164,9 +164,6 @@ a:hover .emoji, button:hover .emoji { animation: wiggle 0.45s ease-in-out; }
 .react-sign[hidden] { display: none; }
 .react-sign > p { margin: 0 0 10px; font-size: 15px; }
 .react-sign .sign-form { margin-bottom: 0; }
-.reacted-by { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; font: 14px var(--sans); }
-.reacted-by[hidden] { display: none; }
-.reacted-by li { padding: 3px 10px; border-radius: 999px; background: var(--code-bg); }
 
 .sign-nudge { margin: 12px 0 0; font: 15px var(--sans); }
 .sign-nudge a { text-decoration: none; }
@@ -279,6 +276,37 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
 .reactions button.mine { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .reactions .emoji { font-size: 18px; line-height: 1; }
 .reactions .count:empty { display: none; }
+.reactions button { position: relative; }
+.reactions .who {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--bg);
+  font: 600 13px var(--sans);
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.15);
+  pointer-events: none;
+}
+.reactions .who::after {
+  content: "";
+  position: absolute;
+  top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--text);
+}
+.reactions button:hover .who:not(:empty), .reactions button:focus-visible .who:not(:empty),
+.reactions button.show-who .who:not(:empty) { display: flex; }
+/* Stop long-press from selecting text or opening the phone's copy menu */
+.reactions button { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
 
 .post-nav {
   display: flex;

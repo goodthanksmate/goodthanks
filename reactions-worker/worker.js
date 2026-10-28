@@ -83,47 +83,62 @@ export class SiteBook extends DurableObject {
       network TEXT NOT NULL,
       created TEXT NOT NULL
     )`);
+    // Every browser that belongs to a guest. Signing with the same name and icon as an
+    // existing guest adds that browser to them instead of making a new entry.
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS devices (
+      client TEXT PRIMARY KEY,
+      guest_id INTEGER NOT NULL
+    )`);
+    this.sql.exec('INSERT OR IGNORE INTO devices (client, guest_id) SELECT client, id FROM guestbook');
+  }
+
+  numbered() {
+    return 'SELECT id, name, emoji, created, ROW_NUMBER() OVER (ORDER BY id) AS number FROM guestbook';
+  }
+
+  // The guest this browser belongs to, as { id, number }, or null
+  guestOf(client) {
+    return this.sql.exec(`SELECT g.id, g.number FROM devices d JOIN (${this.numbered()}) g ON g.id = d.guest_id
+      WHERE d.client = ?`, client).toArray()[0] || null;
   }
 
   entries(client) {
-    const rows = this.sql.exec(`SELECT id, client, name, emoji, created, ROW_NUMBER() OVER (ORDER BY id) AS number
-      FROM guestbook ORDER BY id DESC LIMIT 500`).toArray();
-    const mine = rows.find((row) => client && row.client === client);
-    return {
-      entries: rows.map(({ id, name, emoji, created, number }) => ({ id, name, emoji, created, number })),
-      guest: mine ? mine.number : null,
-    };
+    const entries = this.sql.exec(`${this.numbered()} ORDER BY id LIMIT 500`).toArray();
+    const me = client ? this.guestOf(client) : null;
+    return { entries, guest: me ? me.number : null };
   }
 
-  guestNumber(client) {
-    const row = this.sql.exec(`SELECT number FROM (SELECT client, ROW_NUMBER() OVER (ORDER BY id) AS number FROM guestbook)
-      WHERE client = ?`, client).toArray()[0];
-    return row ? row.number : null;
-  }
-
-  // Name, icon and guest number for each of these browsers that has signed
-  guests(clients) {
-    const unique = [...new Set(clients)].slice(0, 500);
+  // Name, icon and guest number for each of these guest IDs
+  guests(ids) {
+    const unique = [...new Set(ids)].slice(0, 500);
     if (!unique.length) return {};
-    const rows = this.sql.exec(`SELECT client, name, emoji, number FROM
-      (SELECT client, name, emoji, ROW_NUMBER() OVER (ORDER BY id) AS number FROM guestbook)
-      WHERE client IN (${unique.map(() => '?').join(',')})`, ...unique).toArray();
-    return Object.fromEntries(rows.map(({ client, ...guest }) => [client, guest]));
+    const rows = this.sql.exec(`SELECT id, name, emoji, number FROM (${this.numbered()})
+      WHERE id IN (${unique.map(() => '?').join(',')})`, ...unique).toArray();
+    return Object.fromEntries(rows.map(({ id, ...guest }) => [id, guest]));
   }
 
   sign(client, network, name, emoji) {
-    if (this.sql.exec('SELECT 1 FROM guestbook WHERE client = ?', client).toArray().length) {
-      return { error: "You've already signed!" };
+    if (this.guestOf(client)) return { error: "You've already signed!" };
+
+    // Same name (ignoring capitals) and icon as an existing guest: trust it's them on another browser
+    const same = this.sql.exec('SELECT id FROM guestbook WHERE lower(name) = lower(?) AND emoji = ? ORDER BY id LIMIT 1', name, emoji).toArray()[0];
+    if (same) {
+      this.sql.exec('INSERT INTO devices (client, guest_id) VALUES (?, ?)', client, same.id);
+      return this.entries(client);
     }
+
     const { n } = this.sql.exec('SELECT COUNT(*) AS n FROM guestbook WHERE network = ? AND created >= ?', network, today()).one();
     if (n >= MAX_SIGNATURES_PER_NETWORK) return { error: 'Too many signatures from your connection today. Try tomorrow!' };
     this.sql.exec('INSERT INTO guestbook (client, name, emoji, network, created) VALUES (?, ?, ?, ?, ?)',
       client, name, emoji, network, new Date().toISOString());
+    const { id } = this.sql.exec('SELECT last_insert_rowid() AS id').one();
+    this.sql.exec('INSERT INTO devices (client, guest_id) VALUES (?, ?)', client, id);
     return this.entries(client);
   }
 
   remove(id) {
     this.sql.exec('DELETE FROM guestbook WHERE id = ?', id);
+    this.sql.exec('DELETE FROM devices WHERE guest_id = ?', id);
     return this.entries('');
   }
 }
@@ -145,10 +160,13 @@ async function hashNetwork(ip, salt) {
   return [...new Uint8Array(digest)].slice(0, 16).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Swap the browser IDs in a post's reactions for the guests' names and icons, so IDs never leave the server
+// Reactions are stored under "g<guest id>"; swap those for the guests' names and icons
 async function withNames(state, site) {
-  const guests = await site.guests(state.who.map((w) => w.client));
-  const who = state.who.filter((w) => guests[w.client]).map((w) => ({ ...guests[w.client], reaction: w.reaction }));
+  const ids = state.who.map((w) => Number(w.client.slice(1)));
+  const guests = await site.guests(ids);
+  const who = state.who
+    .map((w, i) => guests[ids[i]] && { ...guests[ids[i]], reaction: w.reaction })
+    .filter(Boolean);
   return { counts: state.counts, mine: state.mine, who };
 }
 
@@ -179,7 +197,8 @@ export default {
       const client = request.method === 'POST' ? body.client : params.get('client');
 
       if (request.method === 'GET' && params.has('me')) {
-        return reply({ guest: validClient(client) ? await site.guestNumber(client) : null });
+        const me = validClient(client) ? await site.guestOf(client) : null;
+        return reply({ guest: me ? me.number : null });
       }
       if (request.method === 'GET') return reply(await site.entries(validClient(client) ? client : ''));
       if (request.method !== 'POST') return reply({ error: 'method not allowed' }, 405);
@@ -224,14 +243,16 @@ export default {
 
     const stub = env.POSTS.get(env.POSTS.idFromName(post));
     const site = env.SITE.get(env.SITE.idFromName('site'));
-    const isGuest = (await site.guestNumber(client)) !== null;
+    // Reactions belong to the guest, not the browser, so all of a guest's browsers share one reaction
+    const me = await site.guestOf(client);
+    const key = me ? 'g' + me.id : '';
 
-    if (request.method === 'GET') return reply({ ...(await withNames(await stub.state(client), site)), guest: isGuest });
+    if (request.method === 'GET') return reply({ ...(await withNames(await stub.state(key), site)), guest: !!me });
     if (request.method !== 'POST') return reply({ error: 'method not allowed' }, 405);
 
     if (!REACTIONS.includes(body.reaction)) return reply({ error: 'bad reaction' }, 400);
     // Only people who've signed the guestbook can react
-    if (!isGuest) return reply({ error: 'sign the guestbook first' }, 403);
-    return reply({ ...(await withNames(await stub.toggle(client, await networkHash(), body.reaction), site)), guest: true });
+    if (!me) return reply({ error: 'sign the guestbook first' }, 403);
+    return reply({ ...(await withNames(await stub.toggle(key, await networkHash(), body.reaction), site)), guest: true });
   },
 };

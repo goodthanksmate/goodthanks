@@ -1,4 +1,4 @@
-// Emoji reaction buttons under blog posts, plus who reacted with what. Only guests (people who
+// Emoji reaction buttons under blog posts; hovering one (or long-pressing on touch screens) lists who used it. Only guests (people who
 // signed the guestbook) can react; anyone else gets a sign form first, then their reaction goes through.
 (function () {
   var box = document.querySelector('.reactions');
@@ -6,13 +6,10 @@
   if (!box || !g) return;
   var api = g.api + '?post=' + encodeURIComponent(box.dataset.post);
   var signBox = document.querySelector('.react-sign');
-  var whoList = document.querySelector('.reacted-by');
 
   var state = { counts: {}, mine: [], who: [], guest: false };
   var latest = 0, pending = null;
   var buttons = [].slice.call(box.querySelectorAll('button'));
-  var emojiFor = {};
-  buttons.forEach(function (b) { emojiFor[b.dataset.reaction] = b.querySelector('.emoji').textContent; });
 
   function paint() {
     buttons.forEach(function (b) {
@@ -20,15 +17,17 @@
       b.querySelector('.count').textContent = state.counts[r] || '';
       b.classList.toggle('mine', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
+
+      // Hover list of everyone who used this reaction
+      var list = b.querySelector('.who');
+      list.textContent = '';
+      state.who.forEach(function (w) {
+        if (w.reaction !== r) return;
+        var line = document.createElement('span');
+        line.textContent = w.emoji + ' ' + w.name;
+        list.appendChild(line);
+      });
     });
-    whoList.textContent = '';
-    state.who.forEach(function (w) {
-      var li = document.createElement('li');
-      li.textContent = w.emoji + ' ' + w.name + ' ' + emojiFor[w.reaction];
-      li.title = 'Guest #' + w.number;
-      whoList.appendChild(li);
-    });
-    whoList.hidden = !state.who.length;
   }
 
   // Responses can arrive out of order when clicking fast, so only the newest one counts
@@ -62,8 +61,33 @@
     .then(function (s) { apply(latest)(s); box.hidden = false; })
     .catch(function () {});
 
+  // Long-press on touch screens shows the who-used-it list instead of reacting
+  var pressTimer = null, longPressed = false, startX = 0, startY = 0;
+  function hideWho() { buttons.forEach(function (b) { b.classList.remove('show-who'); }); }
+  document.addEventListener('pointerdown', function (e) { if (!box.contains(e.target)) hideWho(); });
+
   buttons.forEach(function (b) {
+    b.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'touch') return;
+      longPressed = false;
+      startX = e.clientX; startY = e.clientY;
+      pressTimer = setTimeout(function () {
+        longPressed = true;
+        hideWho();
+        b.classList.add('show-who');
+      }, 450);
+    });
+    b.addEventListener('pointermove', function (e) {
+      if (pressTimer && Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 10) { clearTimeout(pressTimer); pressTimer = null; }
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (type) {
+      b.addEventListener(type, function () { clearTimeout(pressTimer); pressTimer = null; });
+    });
+    b.addEventListener('contextmenu', function (e) { if (longPressed) e.preventDefault(); });
+
     b.addEventListener('click', function () {
+      if (longPressed) { longPressed = false; return; }
+      hideWho();
       if (state.guest) return react(b.dataset.reaction);
       pending = b.dataset.reaction;
       signBox.hidden = false;
