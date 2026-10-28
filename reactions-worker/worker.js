@@ -5,7 +5,7 @@
 import { DurableObject } from 'cloudflare:workers';
 
 // Keep in sync with `reactions` in the site's _config.yml
-const REACTIONS = ['like', 'dislike', 'love', 'applaud', 'laugh', 'sad'];
+const REACTIONS = ['good', 'bad', 'love', 'clap', 'laugh', 'sad', 'sandwich'];
 const ORIGIN = 'https://goodthanks.org';
 // Any port on this computer, for previewing the site locally
 const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/;
