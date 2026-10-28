@@ -1,6 +1,6 @@
-// Blog list: shows each post's total reactions with its top three emojis stacked.
+// Post lists (blog page, home page, post sidebar): each post's total reactions with its top three emojis stacked.
 (function () {
-  [].forEach.call(document.querySelectorAll('.post-list[data-reactions-api]'), function (list) {
+  [].forEach.call(document.querySelectorAll('[data-reactions-api]'), function (list) {
     var slots = [].slice.call(list.querySelectorAll('.post-reactions'));
     if (!slots.length) return;
     var reactions = JSON.parse(list.dataset.reactions);

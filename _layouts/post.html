@@ -32,13 +32,15 @@ layout: default
 
   <aside class="post-sidebar">
     <h2 class="section-label">Posts</h2>
-    <ul>
+    <ul{% if site.reactions_api %} data-reactions-api="{{ site.reactions_api }}" data-reactions="{{ site.reactions | jsonify | escape }}"{% endif %}>
       {% for post in site.posts %}
       <li{% if post.url == page.url %} class="current"{% endif %}>
         {% if post.url == page.url %}<span>{% if post.emoji %}<span class="emoji">{{ post.emoji }}</span> {% endif %}{{ post.title }}</span>{% else %}<a href="{{ post.url | relative_url }}">{% if post.emoji %}<span class="emoji">{{ post.emoji }}</span> {% endif %}{{ post.title }}</a>{% endif %}
         <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+        {% if site.reactions_api %}<span class="post-reactions" data-post="{{ post.url }}"></span>{% endif %}
       </li>
       {% endfor %}
     </ul>
   </aside>
+  {% if site.reactions_api %}<script src="{{ '/assets/js/reaction-totals.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>{% endif %}
 </div>
