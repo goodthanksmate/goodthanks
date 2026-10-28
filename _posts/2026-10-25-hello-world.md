@@ -8,7 +8,7 @@ If you're reading this, then you have officially shown more interest in me than 
 
 ![goldstar.png](/assets/images/goldstar.png)
 
-It even says 'GOLD STAR' on it in case you forget what it is. That's the kind of elite-tier customer service that you can expect here at [goodthanks.org](goodthanks.org).
+It even says 'GOLD STAR' on it in case you forget what it is. That's the kind of elite-tier customer service that you can expect here at [goodthanks.org](https://goodthanks.org).
 
 Anyway, I feel like I should explain why I'm starting a blog in the year 2026. There are a few main reasons:
 
