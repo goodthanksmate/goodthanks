@@ -68,6 +68,12 @@ const MAX_SIGNATURES_PER_NETWORK = 3;
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+// The site owner signs in on the hidden /owner/ page with OWNER_PASSWORD (a Cloudflare secret).
+// They're stored as guest ID 0, so they can react but never appear in the guestbook.
+const OWNER = { name: 'Josh', emoji: '👑', owner: true };
+const OWNER_ID = 0;
+const MAX_OWNER_TRIES_PER_HOUR = 5;
+
 // One Durable Object for the whole site's guestbook. Guest numbers are each signature's
 // position in signing order, so deleting spam doesn't leave gaps.
 export class SiteBook extends DurableObject {
@@ -90,14 +96,39 @@ export class SiteBook extends DurableObject {
       guest_id INTEGER NOT NULL
     )`);
     this.sql.exec('INSERT OR IGNORE INTO devices (client, guest_id) SELECT client, id FROM guestbook');
+    // Wrong owner passwords, so guessing can be slowed down
+    this.sql.exec('CREATE TABLE IF NOT EXISTS owner_tries (network TEXT NOT NULL, at INTEGER NOT NULL)');
+  }
+
+  ownerTriesLeft(network) {
+    const hourAgo = Date.now() - 3600e3;
+    this.sql.exec('DELETE FROM owner_tries WHERE at < ?', hourAgo);
+    const { n } = this.sql.exec('SELECT COUNT(*) AS n FROM owner_tries WHERE network = ?', network).one();
+    return MAX_OWNER_TRIES_PER_HOUR - n;
+  }
+
+  ownerWrongTry(network) {
+    this.sql.exec('INSERT INTO owner_tries (network, at) VALUES (?, ?)', network, Date.now());
+  }
+
+  signInOwner(client) {
+    this.sql.exec('INSERT OR REPLACE INTO devices (client, guest_id) VALUES (?, ?)', client, OWNER_ID);
+    return OWNER;
+  }
+
+  signOutOwner(client) {
+    this.sql.exec('DELETE FROM devices WHERE client = ? AND guest_id = ?', client, OWNER_ID);
+    return { owner: false };
   }
 
   numbered() {
     return 'SELECT id, name, emoji, created, ROW_NUMBER() OVER (ORDER BY id) AS number FROM guestbook';
   }
 
-  // The guest this browser belongs to, as { id, number }, or null
+  // The guest this browser belongs to, as { id, number } ({ id: 0, owner: true } for the owner), or null
   guestOf(client) {
+    const device = this.sql.exec('SELECT guest_id FROM devices WHERE client = ?', client).toArray()[0];
+    if (device && device.guest_id === OWNER_ID) return { id: OWNER_ID, number: null, owner: true };
     return this.sql.exec(`SELECT g.id, g.number FROM devices d JOIN (${this.numbered()}) g ON g.id = d.guest_id
       WHERE d.client = ?`, client).toArray()[0] || null;
   }
@@ -105,7 +136,7 @@ export class SiteBook extends DurableObject {
   entries(client) {
     const entries = this.sql.exec(`${this.numbered()} ORDER BY id LIMIT 500`).toArray();
     const me = client ? this.guestOf(client) : null;
-    return { entries, guest: me ? me.number : null };
+    return { entries, guest: me ? me.number : null, owner: !!(me && me.owner) };
   }
 
   // Name, icon and guest number for each of these guest IDs
@@ -114,11 +145,14 @@ export class SiteBook extends DurableObject {
     if (!unique.length) return {};
     const rows = this.sql.exec(`SELECT id, name, emoji, number FROM (${this.numbered()})
       WHERE id IN (${unique.map(() => '?').join(',')})`, ...unique).toArray();
-    return Object.fromEntries(rows.map(({ id, ...guest }) => [id, guest]));
+    const found = Object.fromEntries(rows.map(({ id, ...guest }) => [id, guest]));
+    if (unique.includes(OWNER_ID)) found[OWNER_ID] = { ...OWNER, number: null };
+    return found;
   }
 
   sign(client, network, name, emoji) {
-    if (this.guestOf(client)) return { error: "You've already signed!" };
+    const me = this.guestOf(client);
+    if (me) return { error: me.owner ? "You're the owner, you don't need to sign!" : "You've already signed!" };
 
     // Same name (ignoring capitals) and icon as an existing guest: trust it's them on another browser
     const same = this.sql.exec('SELECT id FROM guestbook WHERE lower(name) = lower(?) AND emoji = ? ORDER BY id LIMIT 1', name, emoji).toArray()[0];
@@ -191,6 +225,22 @@ export default {
     const validClient = (c) => /^[0-9a-f-]{36}$/.test(c || '');
     const networkHash = () => hashNetwork(request.headers.get('CF-Connecting-IP') || '', env.IP_SALT || '');
 
+    if (url.pathname === '/owner') {
+      if (request.method !== 'POST') return reply({ error: 'method not allowed' }, 405);
+      const site = env.SITE.get(env.SITE.idFromName('site'));
+      const body = await request.json().catch(() => ({}));
+      if (!validClient(body.client)) return reply({ error: 'bad client' }, 400);
+      if (params.has('signout')) return reply(await site.signOutOwner(body.client));
+
+      const network = await networkHash();
+      if ((await site.ownerTriesLeft(network)) <= 0) return reply({ error: 'Too many wrong tries. Wait an hour.' }, 429);
+      if (!env.OWNER_PASSWORD || body.password !== env.OWNER_PASSWORD) {
+        await site.ownerWrongTry(network);
+        return reply({ error: 'Wrong password.' }, 403);
+      }
+      return reply(await site.signInOwner(body.client));
+    }
+
     if (url.pathname === '/guestbook') {
       const site = env.SITE.get(env.SITE.idFromName('site'));
       const body = request.method === 'POST' ? await request.json().catch(() => ({})) : {};
@@ -200,7 +250,7 @@ export default {
         const me = validClient(client) ? await site.guestOf(client) : null;
         if (!me) return reply({ guest: null });
         const { name, emoji } = (await site.guests([me.id]))[me.id];
-        return reply({ guest: me.number, name, emoji });
+        return reply({ guest: me.number, owner: !!me.owner, name, emoji });
       }
       if (request.method === 'GET') return reply(await site.entries(validClient(client) ? client : ''));
       if (request.method !== 'POST') return reply({ error: 'method not allowed' }, 405);

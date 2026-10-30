@@ -23,10 +23,11 @@
       list.appendChild(li);
     });
     book.querySelector('.guestbook-empty').hidden = data.entries.length > 0;
-    form.hidden = !!data.guest;
+    form.hidden = !!(data.guest || data.owner);
     var signed = book.querySelector('.signed-msg');
     signed.hidden = !data.guest;
     if (data.guest) signed.querySelector('span').textContent = data.guest.toLocaleString('en');
+    book.querySelector('.owner-msg').hidden = !data.owner;
   }
 
   fetch(g.api + '/guestbook?client=' + g.client)

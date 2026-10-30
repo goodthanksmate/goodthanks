@@ -37,14 +37,15 @@
     fetch(api + '/guestbook?me&client=' + client)
       .then(function (r) { return r.json(); })
       .then(function (d) {
-        [].forEach.call(document.querySelectorAll('.sign-nudge'), function (n) { n.hidden = !!d.guest; });
+        var known = !!(d.guest || d.owner);
+        [].forEach.call(document.querySelectorAll('.sign-nudge'), function (n) { n.hidden = known; });
         var chip = document.querySelector('.me-chip');
         if (!chip) return;
-        chip.hidden = !d.guest;
-        if (!d.guest) return;
+        chip.hidden = !known;
+        if (!known) return;
         chip.querySelector('.emoji').textContent = d.emoji;
         chip.querySelector('.me-name').textContent = d.name;
-        chip.title = "You're guest #" + d.guest;
+        chip.title = d.owner ? "You're the owner" : "You're guest #" + d.guest;
       })
       .catch(function () {});
   };

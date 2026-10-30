@@ -1,0 +1,20 @@
+---
+layout: page
+title: Owner
+permalink: /owner/
+---
+<section class="owner" hidden>
+  <form class="owner-form sign-form">
+    <label class="name-field">
+      <span>Password</span>
+      <input name="password" type="password" required autocomplete="current-password">
+    </label>
+    <button type="submit">Sign in</button>
+    <p class="form-msg" role="status"></p>
+  </form>
+  <div class="owner-in" hidden>
+    <p>You're signed in as <strong>👑 Josh</strong> on this browser.</p>
+    <button type="button" class="owner-out">Sign out</button>
+  </div>
+</section>
+<script src="{{ '/assets/js/owner.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
