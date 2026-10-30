@@ -1,25 +1,15 @@
+/* The site is dark only */
 :root {
-  --bg: #f9fafb;
-  --text: #1c1f23;
-  --muted: #6b7280;
-  --line: #e2e5e9;
-  --accent: #2563eb;
-  --hover: #1e40af;
-  --code-bg: #eef0f3;
+  color-scheme: dark;
+  --bg: #15171a;
+  --text: #e6e8eb;
+  --muted: #8b929b;
+  --line: #2a2e33;
+  --accent: #6ea8fe;
+  --hover: #a5c8ff;
+  --code-bg: #1f2226;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #15171a;
-    --text: #e6e8eb;
-    --muted: #8b929b;
-    --line: #2a2e33;
-    --accent: #6ea8fe;
-    --hover: #a5c8ff;
-    --code-bg: #1f2226;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -124,6 +114,7 @@ a:hover .emoji, button:hover .emoji { animation: wiggle 0.45s ease-in-out; }
 
 /* Home page daily fact + ISS line */
 .today { margin-top: 32px; }
+.today .live { color: var(--accent); font-weight: 600; }
 
 /* Guestbook */
 .guestbook { font-family: var(--sans); }
@@ -158,7 +149,7 @@ a:hover .emoji, button:hover .emoji { animation: wiggle 0.45s ease-in-out; }
 .sign-form button {
   padding: 9px 18px;
   font: 600 15px var(--sans);
-  color: #fff;
+  color: var(--bg);
   background: var(--accent);
   border: 0;
   border-radius: 999px;
@@ -167,7 +158,7 @@ a:hover .emoji, button:hover .emoji { animation: wiggle 0.45s ease-in-out; }
 .sign-form button:hover { background: var(--hover); }
 .sign-form button:disabled { opacity: 0.6; cursor: default; }
 .sign-form { font-family: var(--sans); }
-.form-msg { color: #dc2626; font-size: 14px; margin: 10px 0 0; }
+.form-msg { color: #f87171; font-size: 14px; margin: 10px 0 0; }
 .form-msg:empty { display: none; }
 .signed-msg { font-size: 18px; margin: 0 0 36px; }
 .signed-msg strong { color: var(--accent); }
@@ -319,7 +310,7 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
   color: var(--bg);
   font: 600 13px var(--sans);
   white-space: nowrap;
-  box-shadow: 0 4px 14px rgb(0 0 0 / 0.15);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.4);
   pointer-events: none;
 }
 .reactions .who::after {

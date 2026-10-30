@@ -5,9 +5,17 @@
   function render() {
     var el = document.getElementById('today');
     if (!el || (!fact && !place)) return;
-    var text = fact ? 'Did you know that ' + fact + '?' : '';
-    if (place) text += fact ? ' Also the ISS is over ' + place + ' right now.' : 'The ISS is over ' + place + ' right now.';
-    el.textContent = text;
+    // The fact and the ISS's location are coloured, since they're the bits that change
+    var parts = fact ? ['Did you know that ', { live: fact }, '?'] : [];
+    if (place) parts = parts.concat([fact ? ' Also the ISS is over ' : 'The ISS is over ', { live: place }, ' right now.']);
+    el.textContent = '';
+    parts.forEach(function (p) {
+      if (typeof p === 'string') return el.appendChild(document.createTextNode(p));
+      var span = document.createElement('span');
+      span.className = 'live';
+      span.textContent = p.live;
+      el.appendChild(span);
+    });
     el.hidden = false;
   }
 
