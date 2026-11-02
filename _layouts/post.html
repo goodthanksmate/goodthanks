@@ -15,8 +15,9 @@ layout: default
     {% if site.reactions_api %}
     <div class="reactions" data-api="{{ site.reactions_api }}" data-post="{{ page.url }}" hidden>
       {% for r in site.reactions %}<button type="button" data-reaction="{{ r.name }}" title="{{ r.label }}" aria-label="{{ r.label }}"><span class="emoji">{{ r.emoji }}</span><span class="count"></span><span class="who" aria-hidden="true"></span></button>
-      {% endfor %}
+      {% endfor %}<button type="button" class="add-reaction" title="React with any emoji" aria-label="React with any emoji"><span class="emoji">🙂</span><span class="plus">+</span></button>
     </div>
+    <div class="emoji-pop" hidden></div>
     <div class="react-sign" hidden>
       <p>Sign the guestbook to react! Just a name and an icon.</p>
       {% include sign-form.html button="Sign & react" %}

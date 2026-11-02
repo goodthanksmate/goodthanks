@@ -34,7 +34,8 @@ defaults:
       layout: page
 
 # Emoji reactions under blog posts. reactions_api is the Cloudflare worker's address
-# (leave it empty to hide reactions). Names must match REACTIONS in reactions-worker/worker.js
+# (leave it empty to hide reactions). Names must match REACTIONS in reactions-worker/worker.js.
+# These are always shown; people can also react with any other emoji from the picker.
 reactions_api: https://goodthanks-reactions.reactions-worker.workers.dev
 reactions:
   - { name: good,     emoji: "👍", label: Good }
@@ -43,7 +44,6 @@ reactions:
   - { name: clap,     emoji: "👏", label: Clap }
   - { name: laugh,    emoji: "😂", label: Laugh }
   - { name: sad,      emoji: "😢", label: Sad }
-  - { name: sandwich, emoji: "🥪", label: Sandwich }
 
 # Icons guests can pick when signing the guestbook. Keep in sync with GUESTBOOK_EMOJIS
 # in reactions-worker/worker.js

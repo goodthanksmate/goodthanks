@@ -304,6 +304,23 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
 .reactions button.mine { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .reactions .emoji { font-size: 18px; line-height: 1; }
 .reactions .count:empty { display: none; }
+.reactions .add-reaction { opacity: 0.75; }
+.reactions .add-reaction:hover { opacity: 1; }
+.reactions .add-reaction .plus { font-size: 15px; font-weight: 700; margin-left: -2px; }
+.emoji-pop { margin-top: 10px; }
+.emoji-pop[hidden] { display: none; }
+.emoji-pop emoji-picker {
+  width: 100%;
+  max-width: 380px;
+  height: 340px;
+  --background: var(--code-bg);
+  --border-color: var(--line);
+  --input-border-color: var(--line);
+  --input-font-color: var(--text);
+  --indicator-color: var(--accent);
+  --outline-color: var(--accent);
+  --border-radius: 10px;
+}
 .reactions button { position: relative; }
 .reactions .who {
   position: absolute;
@@ -393,8 +410,8 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
   .me-chip { order: 1; margin-left: auto; max-width: 150px; font-size: 13px; }
   .site-header nav a { padding: 8px 0; }
 
-  /* All seven reactions on one row, as big tap targets */
-  .reactions { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  /* Reactions as a tidy grid of big tap targets */
+  .reactions { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 4px; }
   .reactions button { justify-content: center; gap: 3px; min-height: 42px; padding: 6px 0; font-size: 12px; }
   .reactions .emoji { font-size: 17px; }
 

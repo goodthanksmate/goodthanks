@@ -1,17 +1,54 @@
-// Emoji reaction buttons under blog posts; hovering one (or long-pressing on touch screens) lists who used it. Only guests (people who
-// signed the guestbook) can react; anyone else gets a sign form first, then their reaction goes through.
+// Emoji reaction buttons under blog posts. The fixed reactions are always shown; the ➕ button opens
+// a picker for any other emoji, and those get their own button once someone uses them. Hovering a
+// reaction (or long-pressing on touch screens) lists who used it. Only guests (people who signed the
+// guestbook) can react; anyone else gets a sign form first, then their reaction goes through.
 (function () {
   var box = document.querySelector('.reactions');
   var g = window.goodthanks;
   if (!box || !g) return;
   var api = g.api + '?post=' + encodeURIComponent(box.dataset.post);
   var signBox = document.querySelector('.react-sign');
+  var addButton = box.querySelector('.add-reaction');
+  var pickerBox = document.querySelector('.emoji-pop');
+  var PICKER = 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1.29.1/index.js';
+  var PICKER_DATA = 'https://cdn.jsdelivr.net/npm/emoji-picker-element-data@1.8.0/en/emojibase/data.json';
 
   var state = { counts: {}, mine: [], who: [], guest: false };
   var latest = 0, pending = null;
-  var buttons = [].slice.call(box.querySelectorAll('button'));
+  var fixed = [].slice.call(box.querySelectorAll('button[data-reaction]'));
+  var buttons = fixed.slice();
+
+  // Picking an emoji that's already a fixed reaction (like 👍) uses the fixed one
+  var fixedByEmoji = {};
+  fixed.forEach(function (b) { fixedByEmoji[b.querySelector('.emoji').textContent] = b.dataset.reaction; });
+
+  function makeButton(emoji) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.reaction = emoji;
+    b.title = emoji;
+    b.setAttribute('aria-label', emoji);
+    b.innerHTML = '<span class="emoji"></span><span class="count"></span><span class="who" aria-hidden="true"></span>';
+    b.querySelector('.emoji').textContent = emoji;
+    bind(b);
+    buttons.push(b);
+    return b;
+  }
+
+  // Custom emoji buttons come and go with their counts; fixed ones always stay
+  function syncCustomButtons() {
+    Object.keys(state.counts).forEach(function (r) {
+      if (state.counts[r] > 0 && !buttons.some(function (b) { return b.dataset.reaction === r; })) makeButton(r);
+    });
+    buttons = buttons.filter(function (b) {
+      var keep = fixed.indexOf(b) !== -1 || state.counts[b.dataset.reaction] > 0;
+      if (!keep) b.remove();
+      return keep;
+    });
+  }
 
   function paint() {
+    syncCustomButtons();
     sortButtons();
     buttons.forEach(function (b) {
       var r = b.dataset.reaction, on = state.mine.indexOf(r) !== -1;
@@ -57,12 +94,21 @@
       .catch(function () {});
   }
 
-  // Most-used reactions first, ties in the usual order
+  // Guests react straight away; anyone else signs the guestbook first
+  function choose(r) {
+    if (state.guest) return react(r);
+    pending = r;
+    signBox.hidden = false;
+    signBox.querySelector('input[name=name]').focus();
+  }
+
+  // Most-used reactions first, ties in the usual order, with ➕ always last
   function sortButtons() {
     buttons
       .map(function (b, i) { return { b: b, i: i, n: state.counts[b.dataset.reaction] || 0 }; })
       .sort(function (x, y) { return y.n - x.n || x.i - y.i; })
       .forEach(function (x) { box.appendChild(x.b); });
+    box.appendChild(addButton);
   }
 
   fetch(api + '&client=' + g.client)
@@ -83,9 +129,13 @@
     else if (rect.right > window.innerWidth - margin) nudge = window.innerWidth - margin - rect.right;
     who.style.setProperty('--nudge', nudge + 'px');
   }
-  document.addEventListener('pointerdown', function (e) { if (!box.contains(e.target)) hideWho(); });
+  document.addEventListener('pointerdown', function (e) {
+    if (!box.contains(e.target)) hideWho();
+    if (!pickerBox.hidden && !pickerBox.contains(e.target) && !addButton.contains(e.target)) pickerBox.hidden = true;
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') pickerBox.hidden = true; });
 
-  buttons.forEach(function (b) {
+  function bind(b) {
     b.addEventListener('pointerdown', function (e) {
       if (e.pointerType !== 'touch') return;
       longPressed = false;
@@ -110,11 +160,27 @@
     b.addEventListener('click', function () {
       if (longPressed) { longPressed = false; return; }
       hideWho();
-      if (state.guest) return react(b.dataset.reaction);
-      pending = b.dataset.reaction;
-      signBox.hidden = false;
-      signBox.querySelector('input[name=name]').focus();
+      choose(b.dataset.reaction);
     });
+  }
+  fixed.forEach(bind);
+
+  // The ➕ button: loads the emoji picker the first time it's needed
+  var pickerReady = null;
+  addButton.addEventListener('click', function () {
+    if (!pickerBox.hidden) { pickerBox.hidden = true; return; }
+    pickerReady = pickerReady || import(PICKER).then(function () {
+      var picker = document.createElement('emoji-picker');
+      picker.className = 'dark';
+      picker.dataSource = PICKER_DATA;
+      picker.addEventListener('emoji-click', function (e) {
+        pickerBox.hidden = true;
+        var emoji = e.detail.unicode;
+        choose(fixedByEmoji[emoji] || emoji);
+      });
+      pickerBox.appendChild(picker);
+    });
+    pickerReady.then(function () { pickerBox.hidden = false; }).catch(function () {});
   });
 
   g.bindForm(signBox.querySelector('.sign-form'), function () {

@@ -11,12 +11,17 @@
       .then(function (all) {
         slots.forEach(function (slot) {
           var counts = all[slot.dataset.post] || {};
+          // Fixed reactions plus any picked emoji (stored as the emoji itself)
+          var used = reactions.slice();
+          Object.keys(counts).forEach(function (key) {
+            if (!reactions.some(function (r) { return r.name === key; })) used.push({ name: key, emoji: key, label: key });
+          });
           // Most popular first; ties keep the order from _config.yml
-          var top = reactions
+          var top = used
             .filter(function (r) { return counts[r.name] > 0; })
             .sort(function (a, b) { return counts[b.name] - counts[a.name]; })
             .slice(0, 3);
-          var total = reactions.reduce(function (sum, r) { return sum + (counts[r.name] || 0); }, 0);
+          var total = used.reduce(function (sum, r) { return sum + (counts[r.name] || 0); }, 0);
           if (!total) return;
 
           var stack = document.createElement('span');

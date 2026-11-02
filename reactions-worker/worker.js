@@ -5,7 +5,11 @@
 import { DurableObject } from 'cloudflare:workers';
 
 // Keep in sync with `reactions` in the site's _config.yml
-const REACTIONS = ['good', 'bad', 'love', 'clap', 'laugh', 'sad', 'sandwich'];
+const REACTIONS = ['good', 'bad', 'love', 'clap', 'laugh', 'sad'];
+// Besides the fixed reactions, people can react with any single emoji from the picker. Those are
+// stored as the emoji itself, so this only lets through one real emoji (skin tones and all).
+const ONE_EMOJI = /^\p{RGI_Emoji}$/v;
+const validReaction = (r) => REACTIONS.includes(r) || (typeof r === 'string' && r.length <= 32 && ONE_EMOJI.test(r));
 const ORIGIN = 'https://goodthanks.org';
 // Any port on this computer, for previewing the site locally
 const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/;
@@ -302,7 +306,7 @@ export default {
     if (request.method === 'GET') return reply({ ...(await withNames(await stub.state(key), site)), guest: !!me });
     if (request.method !== 'POST') return reply({ error: 'method not allowed' }, 405);
 
-    if (!REACTIONS.includes(body.reaction)) return reply({ error: 'bad reaction' }, 400);
+    if (!validReaction(body.reaction)) return reply({ error: 'bad reaction' }, 400);
     // Only people who've signed the guestbook can react
     if (!me) return reply({ error: 'sign the guestbook first' }, 403);
     return reply({ ...(await withNames(await stub.toggle(key, await networkHash(), body.reaction), site)), guest: true });
