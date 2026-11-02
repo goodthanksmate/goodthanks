@@ -11,6 +11,7 @@ layout: default
     <div class="prose">
       {{ content }}
     </div>
+    <script src="{{ '/assets/js/media.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>
 
     {% if site.reactions_api %}
     <div class="reactions" data-api="{{ site.reactions_api }}" data-post="{{ page.url }}" hidden>

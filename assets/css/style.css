@@ -259,7 +259,7 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
 
 .post-reactions + .thumb { margin-left: 16px; }
 .post-list .thumb { flex: 0 0 auto; margin-left: auto; align-self: center; line-height: 0; }
-.post-list .thumb img { width: 64px; height: 48px; object-fit: cover; border-radius: 4px; }
+.post-list .thumb img { width: 64px; height: 48px; object-fit: cover; border-radius: 6px; }
 .post-list a:hover { color: var(--hover); }
 .more { font-family: var(--sans); font-size: 15px; }
 
@@ -268,7 +268,10 @@ h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; }
 .post-header time { color: var(--muted); font: 15px var(--sans); }
 
 .prose { overflow-wrap: break-word; }
-.prose img, .prose video { max-width: 100%; height: auto; border-radius: 4px; }
+.prose img, .prose video { display: block; max-width: 100%; height: auto; border-radius: 10px; }
+.prose video { width: 100%; background: #000; }
+.prose .embed { position: relative; aspect-ratio: 16 / 9; margin: 24px 0; border-radius: 10px; overflow: hidden; background: #000; }
+.prose .embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .prose figure { margin: 32px 0; }
 .prose figcaption { color: var(--muted); font: 14px var(--sans); text-align: center; margin-top: 8px; }
 .prose h2 { font-size: 26px; margin: 40px 0 12px; }

@@ -1,6 +1,7 @@
 media:
   input: assets/images
   output: /assets/images
+  categories: [image, video]
 
 content:
   - name: posts
@@ -25,8 +26,10 @@ content:
         label: Emoji (optional, shown next to the title)
         type: string
       - name: body
-        label: Post
+        label: Post (to add a video, upload it with the image button; paste a YouTube link on its own line to embed it)
         type: rich-text
+        options:
+          categories: [image, video]
 
   - name: tabs
     label: Tabs (extra pages)
