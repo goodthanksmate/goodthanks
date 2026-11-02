@@ -29,11 +29,7 @@
     return null;
   }
 
-  document.querySelectorAll('.prose p').forEach(function (p) {
-    var a = p.querySelector('a');
-    if (!a || p.children.length !== 1 || p.textContent.trim() !== a.textContent.trim()) return;
-    var id = youtubeId(a.href);
-    if (!id || !/^[\w-]{6,}$/.test(id)) return;
+  function embed(id) {
     var wrap = document.createElement('div');
     wrap.className = 'embed';
     var frame = document.createElement('iframe');
@@ -43,6 +39,32 @@
     frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
     frame.allowFullscreen = true;
     wrap.appendChild(frame);
-    p.replaceWith(wrap);
+    return wrap;
+  }
+
+  // Skips whitespace-only text between a link and its neighbours.
+  function sibling(node, dir) {
+    var n = node[dir];
+    while (n && n.nodeType === 3 && !n.textContent.trim()) n = n[dir];
+    return n;
+  }
+  function isEdge(n) { return !n || n.nodeName === 'BR'; }
+
+  // A YouTube link on a line of its own (alone in its paragraph, or between line breaks)
+  // becomes an embed, splitting the paragraph around it.
+  document.querySelectorAll('.prose p > a').forEach(function (a) {
+    var id = youtubeId(a.href);
+    if (!id || !/^[\w-]{6,}$/.test(id)) return;
+    var prev = sibling(a, 'previousSibling'), next = sibling(a, 'nextSibling');
+    if (!isEdge(prev) || !isEdge(next)) return;
+    var p = a.parentNode;
+    var after = p.cloneNode(false);
+    while (a.nextSibling) after.appendChild(a.nextSibling);
+    if (prev) p.removeChild(prev);
+    if (next) after.removeChild(next);
+    a.remove();
+    p.after(embed(id));
+    if (after.textContent.trim() || after.querySelector('img, video')) p.nextSibling.after(after);
+    if (!p.textContent.trim() && !p.querySelector('img, video')) p.remove();
   });
 })();
